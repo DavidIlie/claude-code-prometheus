@@ -91,7 +91,7 @@ RUN addgroup --system --gid 1001 nodejs \
 # Copy built application
 COPY --from=builder --chown=nodejs:nodejs /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder --chown=nodejs:nodejs /app/packages/shared/package.json ./packages/shared/
-COPY --from=builder --chown=nodejs:nodejs /app/apps/server/.output ./.output
+COPY --from=builder --chown=nodejs:nodejs /app/apps/server/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/apps/server/prisma ./prisma
 COPY --from=builder --chown=nodejs:nodejs /app/apps/server/package.json ./
 COPY --from=builder --chown=nodejs:nodejs /app/apps/server/version.txt ./version.txt

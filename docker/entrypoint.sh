@@ -17,4 +17,4 @@ echo "✅ Database ready!"
 
 # Start the application
 echo "🌐 Starting server on port ${PORT:-3000}..."
-exec node .output/server/index.mjs
+exec node dist/server/server.js
