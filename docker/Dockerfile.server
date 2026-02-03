@@ -1,74 +1,124 @@
-# Build stage
-FROM node:22-alpine AS builder
+# syntax=docker/dockerfile:1
+
+ARG NODE_VERSION=22
+
+# =============================================================================
+# Dependencies stage - install only production dependencies
+# =============================================================================
+FROM node:${NODE_VERSION}-alpine AS deps
 
 WORKDIR /app
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
-# Copy workspace files
-COPY pnpm-workspace.yaml pnpm-lock.yaml* package.json ./
+# Copy workspace configuration
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY apps/server/package.json ./apps/server/
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install all dependencies (needed for build)
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
+
+# =============================================================================
+# Builder stage - build the application
+# =============================================================================
+FROM node:${NODE_VERSION}-alpine AS builder
+
+ARG VERSION=dev
+
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@9 --activate
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+COPY --from=deps /app/apps/server/node_modules ./apps/server/node_modules
 
 # Copy source files
 COPY packages/shared ./packages/shared
 COPY apps/server ./apps/server
-COPY tsconfig.json ./
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json tsconfig.json ./
 
 # Generate Prisma client
 RUN pnpm --filter server prisma:generate
 
-# Build shared package first
-RUN pnpm --filter @claude-code-prometheus/shared build
+# Build shared package
+RUN pnpm --filter @davidilie/claude-code-prometheus-shared build
 
 # Build server
 RUN pnpm --filter server build
 
-# Production stage
-FROM node:22-alpine AS runner
+# Write version file
+RUN echo "${VERSION}" > /app/apps/server/version.txt
+
+# =============================================================================
+# Production stage - minimal runtime image
+# =============================================================================
+FROM node:${NODE_VERSION}-alpine AS runner
+
+ARG VERSION=dev
+ARG TARGETPLATFORM
+ARG TARGETARCH
+ARG VENDOR=davidilie
+
+# OCI Labels
+LABEL org.opencontainers.image.title="claude-code-prometheus"
+LABEL org.opencontainers.image.description="Track Claude Code usage across machines with Prometheus metrics"
+LABEL org.opencontainers.image.url="https://github.com/DavidIlie/claude-code-prometheus"
+LABEL org.opencontainers.image.source="https://github.com/DavidIlie/claude-code-prometheus"
+LABEL org.opencontainers.image.version="${VERSION}"
+LABEL org.opencontainers.image.vendor="${VENDOR}"
+LABEL org.opencontainers.image.licenses="MIT"
 
 WORKDIR /app
 
-# Install pnpm for running
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+# Install runtime dependencies
+RUN apk add --no-cache \
+    ca-certificates \
+    curl \
+    tini \
+    tzdata \
+    && rm -rf /var/cache/apk/*
 
 # Create non-root user
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nodejs
+RUN addgroup --system --gid 1001 nodejs \
+    && adduser --system --uid 1001 --ingroup nodejs nodejs
 
-# Copy built files
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
-COPY --from=builder /app/packages/shared/package.json ./packages/shared/
-COPY --from=builder /app/apps/server/.output ./.output
-COPY --from=builder /app/apps/server/prisma ./prisma
-COPY --from=builder /app/apps/server/package.json ./
+# Copy built application
+COPY --from=builder --chown=nodejs:nodejs /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder --chown=nodejs:nodejs /app/packages/shared/package.json ./packages/shared/
+COPY --from=builder --chown=nodejs:nodejs /app/apps/server/.output ./.output
+COPY --from=builder --chown=nodejs:nodejs /app/apps/server/prisma ./prisma
+COPY --from=builder --chown=nodejs:nodejs /app/apps/server/package.json ./
+COPY --from=builder --chown=nodejs:nodejs /app/apps/server/version.txt ./version.txt
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 
-# Copy entrypoint script
-COPY docker/entrypoint.sh /app/entrypoint.sh
+# Copy entrypoint
+COPY --chown=nodejs:nodejs docker/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Create data directory for SQLite
-RUN mkdir -p /app/data && chown -R nodejs:nodejs /app/data
+# Create data directory
+RUN mkdir -p /app/data && chown -R nodejs:nodejs /app /app/data
 
-# Set environment
-ENV NODE_ENV=production
-ENV DATABASE_URL=file:/app/data/db.sqlite
-ENV PORT=3000
+# Environment
+ENV NODE_ENV=production \
+    DATABASE_URL=file:/app/data/db.sqlite \
+    PORT=3000
 
 # Switch to non-root user
 USER nodejs
 
-# Expose ports
+# Expose port
 EXPOSE 3000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -fsS http://localhost:3000/api/health || exit 1
 
-# Run entrypoint script which handles migrations and starts server
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Use tini as init system
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["/app/entrypoint.sh"]
