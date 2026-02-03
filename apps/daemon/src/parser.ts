@@ -1,6 +1,6 @@
 import { createReadStream, statSync } from "node:fs";
 import { createInterface } from "node:readline";
-import type { ClaudeCodeEntry, UsageEntry } from "@claude-code-prometheus/shared";
+import type { ClaudeCodeEntry, UsageEntry } from "@davidilie/claude-code-prometheus-shared";
 
 export interface ParseResult {
   entries: UsageEntry[];

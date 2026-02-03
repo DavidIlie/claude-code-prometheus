@@ -1,7 +1,7 @@
 import { createInterface } from "node:readline";
 import { hostname } from "node:os";
 import { saveConfig, getDefaultClaudeDir } from "./config.js";
-import type { DaemonConfig, DeviceRegistrationResponse } from "@claude-code-prometheus/shared";
+import type { DaemonConfig, DeviceRegistrationResponse } from "@davidilie/claude-code-prometheus-shared";
 
 interface SetupOptions {
   server?: string;

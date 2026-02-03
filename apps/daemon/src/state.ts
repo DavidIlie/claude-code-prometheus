@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync } from "node:fs";
 import { dirname } from "node:path";
 import { getStatePath } from "./config.js";
-import type { DaemonState } from "@claude-code-prometheus/shared";
+import type { DaemonState } from "@davidilie/claude-code-prometheus-shared";
 
 const DEFAULT_STATE: DaemonState = {
   filePositions: {},

@@ -1,6 +1,7 @@
 {
-  "name": "@claude-code-prometheus/shared",
+  "name": "@davidilie/claude-code-prometheus-shared",
   "version": "1.0.0",
+  "description": "Shared types and schemas for Claude Code Prometheus",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,5 +20,14 @@
   },
   "devDependencies": {
     "typescript": "^5.7.2"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidIlie/claude-code-prometheus.git",
+    "directory": "packages/shared"
+  },
+  "license": "MIT"
 }

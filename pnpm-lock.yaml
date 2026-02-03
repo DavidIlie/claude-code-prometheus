@@ -17,7 +17,7 @@ importers:
 
   apps/daemon:
     dependencies:
-      '@claude-code-prometheus/shared':
+      '@davidilie/claude-code-prometheus-shared':
         specifier: workspace:*
         version: link:../../packages/shared
       chokidar:
@@ -45,7 +45,7 @@ importers:
 
   apps/server:
     dependencies:
-      '@claude-code-prometheus/shared':
+      '@davidilie/claude-code-prometheus-shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@hookform/resolvers':

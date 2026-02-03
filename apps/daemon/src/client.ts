@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
 import { appendFileSync } from "node:fs";
-import type { UsageEntry, UsagePushResponse } from "@claude-code-prometheus/shared";
+import type { UsageEntry, UsagePushResponse } from "@davidilie/claude-code-prometheus-shared";
 
 // Log to file for daemon mode
 function logError(message: string): void {

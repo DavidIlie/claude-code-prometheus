@@ -1,4 +1,4 @@
-import type { ModelPricing } from "@claude-code-prometheus/shared";
+import type { ModelPricing } from "@davidilie/claude-code-prometheus-shared";
 import { db } from "~/server/db";
 
 // Default pricing for Claude models (per token) - used as fallback

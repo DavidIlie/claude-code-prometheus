@@ -3,7 +3,7 @@ import {
   setupAdminSchema,
   setupServerSchema,
   setupOptionalSchema,
-} from "@claude-code-prometheus/shared";
+} from "@davidilie/claude-code-prometheus-shared";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { hashPassword, createToken } from "~/server/lib/auth";
 import { z } from "zod";

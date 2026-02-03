@@ -2,7 +2,7 @@ import { z } from "zod";
 import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, rmSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, dirname } from "node:path";
-import type { DaemonConfig } from "@claude-code-prometheus/shared";
+import type { DaemonConfig } from "@davidilie/claude-code-prometheus-shared";
 
 const configSchema = z.object({
   serverUrl: z.string().url(),

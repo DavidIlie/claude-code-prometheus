@@ -50,6 +50,7 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push server image
         uses: docker/build-push-action@v5
@@ -63,10 +64,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  publish-daemon:
+  publish-npm:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build-and-push
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -86,10 +90,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build packages
-        run: pnpm build
+      - name: Build all packages
+        run: pnpm -r build
+
+      - name: Publish shared package to npm
+        run: pnpm --filter @davidilie/claude-code-prometheus-shared publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true  # May fail if version already published
 
       - name: Publish daemon to npm
-        run: pnpm --filter daemon publish --no-git-checks
+        run: pnpm --filter @davidilie/claude-usage-daemon publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

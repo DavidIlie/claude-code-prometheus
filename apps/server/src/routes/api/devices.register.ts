@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { json } from "@tanstack/react-start";
-import { deviceRegistrationSchema } from "@claude-code-prometheus/shared";
+import { deviceRegistrationSchema } from "@davidilie/claude-code-prometheus-shared";
 import { db } from "~/server/db";
 import { generateApiKey } from "~/server/lib/auth";
 import { updateDeviceStatus } from "~/server/lib/metrics";

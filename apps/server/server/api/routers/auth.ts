@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { loginSchema } from "@claude-code-prometheus/shared";
+import { loginSchema } from "@davidilie/claude-code-prometheus-shared";
 import {
   createTRPCRouter,
   publicProcedure,

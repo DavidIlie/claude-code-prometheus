@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { deviceRegistrationSchema } from "@claude-code-prometheus/shared";
+import { deviceRegistrationSchema } from "@davidilie/claude-code-prometheus-shared";
 import {
   createTRPCRouter,
   protectedProcedure,

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { json } from "@tanstack/react-start";
-import { usagePushRequestSchema } from "@claude-code-prometheus/shared";
+import { usagePushRequestSchema } from "@davidilie/claude-code-prometheus-shared";
 import { db } from "~/server/db";
 import { calculateCost, calculateCacheSavings } from "~/server/lib/pricing";
 import {

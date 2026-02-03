@@ -1,7 +1,7 @@
 import chokidar from "chokidar";
 import { join } from "node:path";
 import { existsSync, readFileSync, unlinkSync, appendFileSync } from "node:fs";
-import type { DaemonConfig } from "@claude-code-prometheus/shared";
+import type { DaemonConfig } from "@davidilie/claude-code-prometheus-shared";
 import { ApiClient } from "./client.js";
 import { parseJSONLFile } from "./parser.js";
 import { loadState, saveState, getFilePosition, setFilePosition } from "./state.js";
