@@ -96,6 +96,7 @@ COPY --from=builder --chown=nodejs:nodejs /app/apps/server/prisma ./prisma
 COPY --from=builder --chown=nodejs:nodejs /app/apps/server/package.json ./
 COPY --from=builder --chown=nodejs:nodejs /app/apps/server/version.txt ./version.txt
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/apps/server/node_modules ./apps/server/node_modules
 
 # Copy entrypoint
 COPY --chown=nodejs:nodejs docker/entrypoint.sh /app/entrypoint.sh
