@@ -3,7 +3,7 @@
 ARG NODE_VERSION=22
 
 # =============================================================================
-# Dependencies stage - install only production dependencies
+# Dependencies stage - install all dependencies
 # =============================================================================
 FROM node:${NODE_VERSION}-alpine AS deps
 
@@ -55,6 +55,14 @@ RUN pnpm --filter server build
 # Write version file
 RUN echo "${VERSION}" > /app/apps/server/version.txt
 
+# Deploy production dependencies using pnpm deploy
+RUN pnpm --filter server deploy --prod /app/deploy
+
+# Copy built assets to deploy directory
+RUN cp -r /app/apps/server/dist /app/deploy/dist && \
+    cp -r /app/apps/server/prisma /app/deploy/prisma && \
+    cp /app/apps/server/version.txt /app/deploy/version.txt
+
 # =============================================================================
 # Production stage - minimal runtime image
 # =============================================================================
@@ -88,15 +96,8 @@ RUN apk add --no-cache \
 RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 --ingroup nodejs nodejs
 
-# Copy built application
-COPY --from=builder --chown=nodejs:nodejs /app/packages/shared/dist ./packages/shared/dist
-COPY --from=builder --chown=nodejs:nodejs /app/packages/shared/package.json ./packages/shared/
-COPY --from=builder --chown=nodejs:nodejs /app/apps/server/dist ./dist
-COPY --from=builder --chown=nodejs:nodejs /app/apps/server/prisma ./prisma
-COPY --from=builder --chown=nodejs:nodejs /app/apps/server/package.json ./
-COPY --from=builder --chown=nodejs:nodejs /app/apps/server/version.txt ./version.txt
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nodejs:nodejs /app/apps/server/node_modules ./apps/server/node_modules
+# Copy deployed application (includes all production deps)
+COPY --from=builder --chown=nodejs:nodejs /app/deploy ./
 
 # Copy entrypoint
 COPY --chown=nodejs:nodejs docker/entrypoint.sh /app/entrypoint.sh
