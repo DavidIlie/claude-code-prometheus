@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.output/
+.vinxi/
+.next/
+
+# Environment (NEVER commit actual .env files)
+.env
+.env.local
+.env.*.local
+apps/server/.env
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite-journal
+apps/server/prisma/data/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.vim
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Daemon state
+.daemon-state.json
+
+# Vite/Build temp files
+*.timestamp_*.js
+*.timestamp_*.mjs
+
+# Turbo
+.turbo/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# TypeScript
+*.tsbuildinfo

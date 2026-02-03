@@ -1,0 +1,54 @@
+# Build stage
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+# Copy workspace files
+COPY pnpm-workspace.yaml pnpm-lock.yaml* package.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY apps/daemon/package.json ./apps/daemon/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source files
+COPY packages/shared ./packages/shared
+COPY apps/daemon ./apps/daemon
+COPY tsconfig.json ./
+
+# Build shared package first
+RUN pnpm --filter @claude-code-prometheus/shared build
+
+# Build daemon
+RUN pnpm --filter daemon build
+
+# Production stage
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nodejs
+
+# Copy built files
+COPY --from=builder /app/apps/daemon/dist ./dist
+COPY --from=builder /app/apps/daemon/package.json ./
+COPY --from=builder /app/apps/daemon/node_modules ./node_modules
+
+# Create config directory
+RUN mkdir -p /home/nodejs/.config/claude-usage-daemon && \
+    chown -R nodejs:nodejs /home/nodejs
+
+# Set environment
+ENV NODE_ENV=production
+
+# Switch to non-root user
+USER nodejs
+
+# Run daemon
+ENTRYPOINT ["node", "dist/index.js"]
+CMD ["start"]

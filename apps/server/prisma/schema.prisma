@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Settings {
+  id                String   @id @default("settings")
+  serverName        String
+  serverUrl         String
+  timezone          String   @default("UTC")
+  currency          String   @default("USD")
+  enablePrometheus  Boolean  @default(true)
+  prometheusPort    Int      @default(9090)
+  retentionDays     Int      @default(90)
+  autoUpdatePricing Boolean  @default(true)
+  setupCompleted    Boolean  @default(false)
+  autoLogin         Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Device {
+  id        String    @id @default(cuid())
+  name      String
+  hostname  String
+  apiKey    String    @unique
+  lastSeen  DateTime  @default(now())
+  createdAt DateTime  @default(now())
+  sessions  Session[]
+}
+
+model Session {
+  id        String       @id @default(cuid())
+  sessionId String
+  deviceId  String
+  device    Device       @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  project   String
+  startedAt DateTime
+  endedAt   DateTime?
+  entries   UsageEntry[]
+
+  @@unique([deviceId, sessionId])
+  @@index([deviceId])
+}
+
+model UsageEntry {
+  id                  String   @id @default(cuid())
+  sessionId           String
+  session             Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  timestamp           DateTime
+  type                String
+  model               String?
+  inputTokens         Int      @default(0)
+  outputTokens        Int      @default(0)
+  cacheCreationTokens Int      @default(0)
+  cacheReadTokens     Int      @default(0)
+  costUSD             Float?
+
+  @@index([timestamp])
+  @@index([sessionId])
+}
+
+model ModelPricing {
+  id                       String   @id
+  inputCostPerToken        Float
+  outputCostPerToken       Float
+  cacheCreationCostPerToken Float
+  cacheReadCostPerToken    Float
+  updatedAt                DateTime @updatedAt
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@davidilie/claude-usage-daemon",
+  "version": "1.0.0",
+  "description": "Daemon to track Claude Code usage and push to central server",
+  "type": "module",
+  "bin": {
+    "claude-usage-daemon": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup src/index.ts --format esm --dts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@claude-code-prometheus/shared": "workspace:*",
+    "chokidar": "^4.0.3",
+    "commander": "^13.0.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

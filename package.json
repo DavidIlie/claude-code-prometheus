@@ -1,0 +1,24 @@
+{
+  "name": "claude-code-prometheus",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Usage tracking system for Claude Code with Prometheus metrics",
+  "scripts": {
+    "dev": "pnpm --filter server dev",
+    "dev:daemon": "pnpm --filter daemon dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "db:generate": "pnpm --filter server prisma:generate",
+    "db:push": "pnpm --filter server prisma:push",
+    "db:studio": "pnpm --filter server prisma:studio"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
