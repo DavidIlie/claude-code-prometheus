@@ -10,7 +10,7 @@ mkdir -p /app/data
 echo "📦 Running database migrations..."
 npx prisma migrate deploy --schema=/app/prisma/schema.prisma 2>/dev/null || {
     echo "⚠️  No migrations found, pushing schema directly..."
-    npx prisma db push --schema=/app/prisma/schema.prisma --skip-generate
+    npx prisma db push --schema=/app/prisma/schema.prisma --accept-data-loss
 }
 
 echo "✅ Database ready!"
