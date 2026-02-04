@@ -49,8 +49,9 @@ RUN pnpm --filter server prisma:generate
 # Build shared package
 RUN pnpm --filter @davidilie/claude-code-prometheus-shared build
 
-# Build server
-RUN pnpm --filter server build
+# Clean any existing build and build fresh
+RUN rm -rf /app/apps/server/dist /app/apps/server/.tanstack && \
+    pnpm --filter server build
 
 # Write version file
 RUN echo "${VERSION}" > /app/apps/server/version.txt
