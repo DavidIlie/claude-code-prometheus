@@ -76,29 +76,12 @@ function DevicesPage() {
     retry: false,
   });
 
-  useEffect(() => {
-    if (!sessionLoading && sessionError) {
-      navigate({ to: "/login" });
-    }
-  }, [sessionLoading, sessionError, navigate]);
-
   const { data: devices, isLoading } = useQuery({
     ...api.devices.list.queryOptions(),
     enabled: !!session,
   });
 
-  // Show loading while checking auth
-  if (sessionLoading || !session) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // All mutations must be declared before any conditional returns
   const registerMutation = useMutation(
     api.devices.register.mutationOptions({
       onSuccess: (data) => {
@@ -115,6 +98,24 @@ function DevicesPage() {
       },
     })
   );
+
+  useEffect(() => {
+    if (!sessionLoading && sessionError) {
+      navigate({ to: "/login" });
+    }
+  }, [sessionLoading, sessionError, navigate]);
+
+  // Show loading while checking auth
+  if (sessionLoading || !session) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
