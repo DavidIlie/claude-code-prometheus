@@ -56,15 +56,12 @@ RUN rm -rf /app/apps/server/dist /app/apps/server/.tanstack && \
 # Write version file
 RUN echo "${VERSION}" > /app/apps/server/version.txt
 
-# Install production dependencies only in a clean directory
+# Prepare deploy directory with all necessary files
 RUN mkdir -p /app/deploy && \
     cp /app/apps/server/package.json /app/deploy/ && \
-    cd /app/deploy && \
-    pnpm install --prod --ignore-scripts
-
-# Copy built assets to deploy directory
-RUN cp -r /app/apps/server/dist /app/deploy/dist && \
+    cp -r /app/apps/server/dist /app/deploy/dist && \
     cp -r /app/apps/server/prisma /app/deploy/prisma && \
+    cp -r /app/apps/server/node_modules /app/deploy/node_modules && \
     cp /app/apps/server/version.txt /app/deploy/
 
 # =============================================================================
