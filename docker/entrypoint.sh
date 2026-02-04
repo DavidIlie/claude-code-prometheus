@@ -8,8 +8,6 @@ mkdir -p /app/data
 
 # Prisma client is pre-generated during build, just run migrations
 # Use the prisma binary from node_modules
-export PRISMA_CLI_BINARY_TARGETS="native,linux-musl-openssl-3.0.x,linux-musl-arm64-openssl-3.0.x"
-
 echo "📦 Running database migrations..."
 ./node_modules/.bin/prisma migrate deploy --schema=/app/prisma/schema.prisma 2>/dev/null || {
     echo "⚠️  No migrations found, pushing schema directly..."
