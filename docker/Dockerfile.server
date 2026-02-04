@@ -57,16 +57,19 @@ RUN rm -rf /app/apps/server/dist /app/apps/server/.tanstack && \
 RUN echo "${VERSION}" > /app/apps/server/version.txt
 
 # Prepare deploy directory with all necessary files
-# Merge server node_modules with root node_modules for complete dependency resolution
 RUN mkdir -p /app/deploy && \
     cp /app/apps/server/package.json /app/deploy/ && \
     cp -r /app/apps/server/dist /app/deploy/dist && \
     cp -r /app/apps/server/prisma /app/deploy/prisma && \
-    cp /app/apps/server/version.txt /app/deploy/ && \
-    # Start with root node_modules (has pnpm structure)
-    cp -r /app/node_modules /app/deploy/node_modules && \
-    # Overlay server-specific node_modules
-    cp -r /app/apps/server/node_modules/* /app/deploy/node_modules/ 2>/dev/null || true
+    cp /app/apps/server/version.txt /app/deploy/
+
+# Copy built shared package
+RUN cp -r /app/packages/shared /app/deploy/packages-shared
+
+# Replace workspace dependency with local path and install with npm
+WORKDIR /app/deploy
+RUN sed -i 's|"@davidilie/claude-code-prometheus-shared": "workspace:\*"|"@davidilie/claude-code-prometheus-shared": "file:./packages-shared"|' package.json && \
+    npm install --omit=dev --ignore-scripts
 
 # =============================================================================
 # Production stage - minimal runtime image
