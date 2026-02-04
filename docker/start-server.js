@@ -1,8 +1,34 @@
 import { createServer } from "node:http";
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { join, extname } from "node:path";
+import { execSync } from "node:child_process";
 
 const PORT = parseInt(process.env.PORT || "3000", 10);
+
+// Initialize database schema
+async function initDatabase() {
+  console.log("📦 Initializing database...");
+  try {
+    // Try to push schema using prisma from node_modules
+    const prismaPath = join(process.cwd(), "node_modules", ".bin", "prisma");
+    if (existsSync(prismaPath)) {
+      execSync(`${prismaPath} db push --schema=/app/prisma/schema.prisma --accept-data-loss --skip-generate`, {
+        stdio: "inherit",
+        env: { ...process.env, npm_config_cache: "/app/.npm" }
+      });
+    } else {
+      // Fallback: use npx
+      execSync("npx prisma db push --schema=/app/prisma/schema.prisma --accept-data-loss --skip-generate", {
+        stdio: "inherit",
+        env: { ...process.env, npm_config_cache: "/app/.npm" }
+      });
+    }
+    console.log("✅ Database ready!");
+  } catch (error) {
+    console.error("⚠️ Database initialization failed:", error.message);
+    console.log("Continuing anyway - database may already be initialized");
+  }
+}
 
 // MIME types for static files
 const MIME_TYPES = {
@@ -38,6 +64,9 @@ function serveStatic(filePath, res) {
 }
 
 async function main() {
+  // Initialize database first
+  await initDatabase();
+
   console.log("Loading TanStack Start server...");
 
   // Import the built server module
