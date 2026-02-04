@@ -58,8 +58,9 @@ RUN echo "${VERSION}" > /app/apps/server/version.txt
 # Deploy production dependencies using pnpm deploy
 RUN pnpm --filter server deploy --prod /app/deploy
 
-# Copy built assets to deploy directory
-RUN cp -r /app/apps/server/dist /app/deploy/dist && \
+# Remove any stale dist from pnpm deploy and copy fresh build
+RUN rm -rf /app/deploy/dist && \
+    cp -r /app/apps/server/dist /app/deploy/dist && \
     cp -r /app/apps/server/prisma /app/deploy/prisma && \
     cp /app/apps/server/version.txt /app/deploy/version.txt
 
