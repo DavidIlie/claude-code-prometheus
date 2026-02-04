@@ -57,13 +57,16 @@ RUN rm -rf /app/apps/server/dist /app/apps/server/.tanstack && \
 RUN echo "${VERSION}" > /app/apps/server/version.txt
 
 # Prepare deploy directory with all necessary files
+# Merge server node_modules with root node_modules for complete dependency resolution
 RUN mkdir -p /app/deploy && \
     cp /app/apps/server/package.json /app/deploy/ && \
     cp -r /app/apps/server/dist /app/deploy/dist && \
     cp -r /app/apps/server/prisma /app/deploy/prisma && \
     cp /app/apps/server/version.txt /app/deploy/ && \
-    # Copy node_modules with pnpm virtual store for complete dependencies
-    cp -r /app/node_modules /app/deploy/node_modules
+    # Start with root node_modules (has pnpm structure)
+    cp -r /app/node_modules /app/deploy/node_modules && \
+    # Overlay server-specific node_modules
+    cp -r /app/apps/server/node_modules/* /app/deploy/node_modules/ 2>/dev/null || true
 
 # =============================================================================
 # Production stage - minimal runtime image

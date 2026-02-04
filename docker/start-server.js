@@ -9,20 +9,11 @@ const PORT = parseInt(process.env.PORT || "3000", 10);
 async function initDatabase() {
   console.log("📦 Initializing database...");
   try {
-    // Try to push schema using prisma from node_modules
-    const prismaPath = join(process.cwd(), "node_modules", ".bin", "prisma");
-    if (existsSync(prismaPath)) {
-      execSync(`${prismaPath} db push --schema=/app/prisma/schema.prisma --accept-data-loss --skip-generate`, {
-        stdio: "inherit",
-        env: { ...process.env, npm_config_cache: "/app/.npm" }
-      });
-    } else {
-      // Fallback: use npx
-      execSync("npx prisma db push --schema=/app/prisma/schema.prisma --accept-data-loss --skip-generate", {
-        stdio: "inherit",
-        env: { ...process.env, npm_config_cache: "/app/.npm" }
-      });
-    }
+    // Use npx with pinned prisma version matching the project
+    execSync("npx prisma@6.2.1 db push --schema=/app/prisma/schema.prisma --accept-data-loss", {
+      stdio: "inherit",
+      env: { ...process.env, npm_config_cache: "/app/.npm" }
+    });
     console.log("✅ Database ready!");
   } catch (error) {
     console.error("⚠️ Database initialization failed:", error.message);
