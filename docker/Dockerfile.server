@@ -108,13 +108,14 @@ COPY --chown=nodejs:nodejs docker/entrypoint.sh /app/entrypoint.sh
 COPY --chown=nodejs:nodejs docker/start-server.js /app/start-server.js
 RUN chmod +x /app/entrypoint.sh
 
-# Create data directory
-RUN mkdir -p /app/data && chown -R nodejs:nodejs /app /app/data
+# Create data and prisma home directories
+RUN mkdir -p /app/data /app/.prisma && chown -R nodejs:nodejs /app /app/data /app/.prisma
 
 # Environment
 ENV NODE_ENV=production \
     DATABASE_URL=file:/app/data/db.sqlite \
-    PORT=3000
+    PORT=3000 \
+    PRISMA_HOME=/app/.prisma
 
 # Switch to non-root user
 USER nodejs
