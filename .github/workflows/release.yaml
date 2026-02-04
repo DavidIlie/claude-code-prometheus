@@ -63,6 +63,7 @@ jobs:
           labels: ${{ steps.meta-server.outputs.labels }}
           build-args: |
             VERSION=${{ steps.meta-server.outputs.version }}
+            CACHEBUST=${{ github.run_id }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
