@@ -15,6 +15,6 @@ echo "📦 Running database migrations..."
 
 echo "✅ Database ready!"
 
-# Start the application
+# Start the application using Node.js HTTP adapter for TanStack Start
 echo "🌐 Starting server on port ${PORT:-3000}..."
-exec node dist/server/server.js
+exec node start-server.js

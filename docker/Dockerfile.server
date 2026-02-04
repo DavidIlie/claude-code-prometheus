@@ -99,8 +99,9 @@ RUN addgroup --system --gid 1001 nodejs \
 # Copy deployed application (includes all production deps)
 COPY --from=builder --chown=nodejs:nodejs /app/deploy ./
 
-# Copy entrypoint
+# Copy entrypoint and Node.js HTTP adapter
 COPY --chown=nodejs:nodejs docker/entrypoint.sh /app/entrypoint.sh
+COPY --chown=nodejs:nodejs docker/start-server.js /app/start-server.js
 RUN chmod +x /app/entrypoint.sh
 
 # Create data directory
