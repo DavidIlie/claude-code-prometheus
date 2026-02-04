@@ -27,7 +27,6 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
 FROM node:${NODE_VERSION}-alpine AS builder
 
 ARG VERSION=dev
-ARG CACHEBUST=1
 
 WORKDIR /app
 
@@ -50,22 +49,23 @@ RUN pnpm --filter server prisma:generate
 # Build shared package
 RUN pnpm --filter @davidilie/claude-code-prometheus-shared build
 
-# Bust cache and clean any existing build, then build fresh
-ARG CACHEBUST
+# Clean and build server (fresh build every time)
 RUN rm -rf /app/apps/server/dist /app/apps/server/.tanstack && \
     pnpm --filter server build
 
 # Write version file
 RUN echo "${VERSION}" > /app/apps/server/version.txt
 
-# Deploy production dependencies using pnpm deploy
-RUN pnpm --filter server deploy --prod /app/deploy
+# Install production dependencies only in a clean directory
+RUN mkdir -p /app/deploy && \
+    cp /app/apps/server/package.json /app/deploy/ && \
+    cd /app/deploy && \
+    pnpm install --prod --ignore-scripts
 
-# Remove any stale dist from pnpm deploy and copy fresh build
-RUN rm -rf /app/deploy/dist && \
-    cp -r /app/apps/server/dist /app/deploy/dist && \
+# Copy built assets to deploy directory
+RUN cp -r /app/apps/server/dist /app/deploy/dist && \
     cp -r /app/apps/server/prisma /app/deploy/prisma && \
-    cp /app/apps/server/version.txt /app/deploy/version.txt
+    cp /app/apps/server/version.txt /app/deploy/
 
 # =============================================================================
 # Production stage - minimal runtime image
@@ -100,7 +100,7 @@ RUN apk add --no-cache \
 RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 --ingroup nodejs nodejs
 
-# Copy deployed application (includes all production deps)
+# Copy deployed application
 COPY --from=builder --chown=nodejs:nodejs /app/deploy ./
 
 # Copy entrypoint and Node.js HTTP adapter
