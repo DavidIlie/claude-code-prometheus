@@ -1,6 +1,41 @@
 import { createServer } from "node:http";
+import { createReadStream, existsSync, statSync } from "node:fs";
+import { join, extname } from "node:path";
 
 const PORT = parseInt(process.env.PORT || "3000", 10);
+
+// MIME types for static files
+const MIME_TYPES = {
+  ".html": "text/html",
+  ".js": "application/javascript",
+  ".css": "text/css",
+  ".json": "application/json",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+  ".eot": "application/vnd.ms-fontobject",
+};
+
+// Serve static file
+function serveStatic(filePath, res) {
+  const ext = extname(filePath).toLowerCase();
+  const contentType = MIME_TYPES[ext] || "application/octet-stream";
+
+  const stat = statSync(filePath);
+  res.writeHead(200, {
+    "Content-Type": contentType,
+    "Content-Length": stat.size,
+    "Cache-Control": "public, max-age=31536000, immutable",
+  });
+
+  createReadStream(filePath).pipe(res);
+}
 
 async function main() {
   console.log("Loading TanStack Start server...");
@@ -11,6 +46,14 @@ async function main() {
   const httpServer = createServer(async (req, res) => {
     try {
       const url = new URL(req.url || "/", `http://${req.headers.host}`);
+
+      // Serve static assets from /assets/ path
+      if (url.pathname.startsWith("/assets/")) {
+        const filePath = join(process.cwd(), "dist/client", url.pathname);
+        if (existsSync(filePath) && statSync(filePath).isFile()) {
+          return serveStatic(filePath, res);
+        }
+      }
 
       // Build headers from node request
       const headers = new Headers();
