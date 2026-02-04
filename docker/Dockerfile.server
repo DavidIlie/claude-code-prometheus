@@ -61,8 +61,9 @@ RUN mkdir -p /app/deploy && \
     cp /app/apps/server/package.json /app/deploy/ && \
     cp -r /app/apps/server/dist /app/deploy/dist && \
     cp -r /app/apps/server/prisma /app/deploy/prisma && \
-    cp -r /app/apps/server/node_modules /app/deploy/node_modules && \
-    cp /app/apps/server/version.txt /app/deploy/
+    cp /app/apps/server/version.txt /app/deploy/ && \
+    # Copy node_modules with pnpm virtual store for complete dependencies
+    cp -r /app/node_modules /app/deploy/node_modules
 
 # =============================================================================
 # Production stage - minimal runtime image
