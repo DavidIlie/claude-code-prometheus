@@ -69,7 +69,9 @@ RUN cp -r /app/packages/shared /app/deploy/packages-shared
 # Replace workspace dependency with local path and install with npm
 WORKDIR /app/deploy
 RUN sed -i 's|"@davidilie/claude-code-prometheus-shared": "workspace:\*"|"@davidilie/claude-code-prometheus-shared": "file:./packages-shared"|' package.json && \
-    npm install --omit=dev --ignore-scripts
+    npm install --omit=dev --ignore-scripts && \
+    # Generate Prisma client for ESM support
+    npx prisma generate --schema=/app/deploy/prisma/schema.prisma
 
 # =============================================================================
 # Production stage - minimal runtime image
