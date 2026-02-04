@@ -93,6 +93,12 @@ RUN apk add --no-cache \
     tzdata \
     && rm -rf /var/cache/apk/*
 
+# Install pnpm for runtime dependency management
+RUN corepack enable && corepack prepare pnpm@9 --activate
+
+# Install prisma CLI globally for runtime migrations
+RUN pnpm add -g prisma@6.2.1
+
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 --ingroup nodejs nodejs

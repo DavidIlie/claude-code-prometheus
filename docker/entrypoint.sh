@@ -6,14 +6,14 @@ echo "🚀 Starting Claude Usage Tracker..."
 # Ensure data directory exists and has correct permissions
 mkdir -p /app/data
 
-# Run database migrations using local prisma (not npx which fetches latest)
+# Run database migrations using globally installed prisma
 echo "📦 Generating Prisma client..."
-./node_modules/.bin/prisma generate --schema=/app/prisma/schema.prisma
+prisma generate --schema=/app/prisma/schema.prisma
 
 echo "📦 Running database migrations..."
-./node_modules/.bin/prisma migrate deploy --schema=/app/prisma/schema.prisma 2>/dev/null || {
+prisma migrate deploy --schema=/app/prisma/schema.prisma 2>/dev/null || {
     echo "⚠️  No migrations found, pushing schema directly..."
-    ./node_modules/.bin/prisma db push --schema=/app/prisma/schema.prisma --accept-data-loss --skip-generate
+    prisma db push --schema=/app/prisma/schema.prisma --accept-data-loss --skip-generate
 }
 
 echo "✅ Database ready!"
