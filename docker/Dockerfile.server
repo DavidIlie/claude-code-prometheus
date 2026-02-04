@@ -43,8 +43,9 @@ COPY packages/shared ./packages/shared
 COPY apps/server ./apps/server
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json tsconfig.json ./
 
-# Generate Prisma client
-RUN pnpm --filter server prisma:generate
+# Generate Prisma client with all binary targets for multi-arch support
+RUN PRISMA_CLI_BINARY_TARGETS="native,linux-musl-openssl-3.0.x,linux-musl-arm64-openssl-3.0.x" \
+    pnpm --filter server prisma:generate
 
 # Build shared package
 RUN pnpm --filter @davidilie/claude-code-prometheus-shared build

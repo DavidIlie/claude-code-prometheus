@@ -6,15 +6,14 @@ echo "🚀 Starting Claude Usage Tracker..."
 # Ensure data directory exists and has correct permissions
 mkdir -p /app/data
 
-# Run database migrations using npx (downloads prisma to local cache)
-export npm_config_cache=/app/.npm
-echo "📦 Generating Prisma client..."
-npx prisma@6.2.1 generate --schema=/app/prisma/schema.prisma
+# Prisma client is pre-generated during build, just run migrations
+# Use the prisma binary from node_modules
+export PRISMA_CLI_BINARY_TARGETS="native,linux-musl-openssl-3.0.x,linux-musl-arm64-openssl-3.0.x"
 
 echo "📦 Running database migrations..."
-npx prisma@6.2.1 migrate deploy --schema=/app/prisma/schema.prisma 2>/dev/null || {
+./node_modules/.bin/prisma migrate deploy --schema=/app/prisma/schema.prisma 2>/dev/null || {
     echo "⚠️  No migrations found, pushing schema directly..."
-    npx prisma@6.2.1 db push --schema=/app/prisma/schema.prisma --accept-data-loss --skip-generate
+    ./node_modules/.bin/prisma db push --schema=/app/prisma/schema.prisma --accept-data-loss --skip-generate
 }
 
 echo "✅ Database ready!"
