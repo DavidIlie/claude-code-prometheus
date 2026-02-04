@@ -93,8 +93,6 @@ RUN apk add --no-cache \
     tzdata \
     && rm -rf /var/cache/apk/*
 
-# Install prisma CLI globally for runtime migrations
-RUN npm install -g prisma@6.2.1
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs \
@@ -108,14 +106,13 @@ COPY --chown=nodejs:nodejs docker/entrypoint.sh /app/entrypoint.sh
 COPY --chown=nodejs:nodejs docker/start-server.js /app/start-server.js
 RUN chmod +x /app/entrypoint.sh
 
-# Create data and prisma home directories
-RUN mkdir -p /app/data /app/.prisma && chown -R nodejs:nodejs /app /app/data /app/.prisma
+# Create data and npm cache directories
+RUN mkdir -p /app/data /app/.npm && chown -R nodejs:nodejs /app /app/data /app/.npm
 
 # Environment
 ENV NODE_ENV=production \
     DATABASE_URL=file:/app/data/db.sqlite \
-    PORT=3000 \
-    PRISMA_HOME=/app/.prisma
+    PORT=3000
 
 # Switch to non-root user
 USER nodejs
